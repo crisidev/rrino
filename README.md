@@ -1,2 +1,2 @@
 # rrino
-rRino - Remote Irssi Notifier - OSX version - Implemented in Rust
+rRino - Remote IRC Notifier - OSX version - Implemented in Rust
