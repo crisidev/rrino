@@ -13,6 +13,7 @@ pub mod cmd {
         pub address: String,
         pub port: u16,
         pub tag: String,
+        pub max_length: usize,
     }
 
     impl Args {
@@ -52,7 +53,13 @@ pub mod cmd {
                     .short("a")
                     .long("address")
                     .help("HTTP server bind address (default: 127.0.0.1)")
-                    .value_name("ADDREss")
+                    .value_name("ADDRESS")
+                    .takes_value(true))
+                .arg(clap::Arg::with_name("max-length")
+                    .short("m")
+                    .long("max-length")
+                    .help("max message lenght before splitting it into multiple notification (default: 92)")
+                    .value_name("LENGTH")
                     .takes_value(true))
                 .get_matches();
 
@@ -65,6 +72,7 @@ pub mod cmd {
             let sender = matches.value_of("sender").unwrap_or("com.apple.Terminal");
             let address = matches.value_of("address").unwrap_or("127.0.0.1");
             let port: u16;
+            let max_length: usize;
             let tag: String;
 
             let link_split: Vec<&str> = link.split(':').collect();
@@ -82,6 +90,18 @@ pub mod cmd {
                 std::process::exit(1)
             }
 
+            match matches
+                .value_of("max_length")
+                .unwrap_or("92")
+                .to_string()
+                .parse::<usize>() {
+                Ok(val) => max_length = val,
+                Err(_) => {
+                    error!("max length needs to be a integer number");
+                    std::process::exit(1)
+                }
+            }
+
             let args = Args {
                 link: link.to_string(),
                 stop,
@@ -91,6 +111,7 @@ pub mod cmd {
                 address: address.to_string(),
                 port,
                 tag,
+                max_length,
             };
 
             debug!("command line arguments: {:#?}", args);
