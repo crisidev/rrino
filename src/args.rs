@@ -92,7 +92,7 @@ pub mod cmd {
 
             match matches
                 .value_of("max_length")
-                .unwrap_or("92")
+                .unwrap_or("90")
                 .to_string()
                 .parse::<usize>() {
                 Ok(val) => max_length = val,

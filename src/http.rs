@@ -23,7 +23,7 @@ pub mod server {
     #[post("/shutdown", format = "application/json", data = "<message>")]
     fn shutdown(message: Json<ShutdownMsg>) -> JsonValue {
         debug!("requested rRino HTTP server shutdown: {:#?}", message);
-        if message.is_forced() {
+        if message.force {
             std::thread::spawn(move || stop(chan_signal::Signal::KILL));
         } else {
             std::thread::spawn(move || stop(chan_signal::Signal::TERM));

@@ -9,20 +9,18 @@ license = "MIT"
 repository = "https://github.com/crisidev/rrino"
 
 [dependencies]
-hyper = "0.11.6"
-futures = "0.1.17"
-log = "0.3.8"
-pretty_env_logger = "0.1.1"
-clap = "2.27.1"
-chan-signal = "0.3.1"
-chan = "0.1.19"
-tokio-core = "0.1"
-rocket = { path = "../Rocket/lib" }
-rocket_codegen = { path = "../Rocket/codegen" }
+log = "0.3"
+pretty_env_logger = "0.1"
+clap = "2.27"
+chan-signal = "0.3"
+chan = "0.1"
 serde = "1.0"
 serde_json = "1.0"
 serde_derive = "1.0"
-reqwest = "0.8.1"
+reqwest = "0.8"
+regex = "0.2"
+rocket = { path = "../Rocket/lib" }
+rocket_codegen = { path = "../Rocket/codegen" }
 
 [dependencies.rocket_contrib]
 path = "../Rocket/contrib"

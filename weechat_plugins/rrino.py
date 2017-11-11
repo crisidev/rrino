@@ -36,7 +36,7 @@ def push_notification(user, message):
     if len(clients) > 0:
         tag, port = clients[0].split(":")
         data = {
-            "title": user,
+            "from": user,
             "message": message
         }
         try:
