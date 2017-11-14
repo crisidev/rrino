@@ -1,14 +1,13 @@
 pub mod osx {
-    extern crate regex;
+    extern crate url;
 
     use std;
     use msg;
     use args;
     use rocket;
-    use self::regex::Regex;
+    use self::url::Url;
 
     pub fn run(message: msg::kind::NotifyMsg, args: rocket::State<args::cmd::Args>) -> bool {
-        debug!("got new notify message: {:#?}", message);
         let title = format!("{}: {}", args.tag, message.from);
         let url = match_url(&message.message);
         if url != "" {
@@ -59,12 +58,17 @@ pub mod osx {
     }
 
     fn match_url(message: &String) -> String {
-        // let re = Regex::new(
-        //     r"https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:;%()\[\]{}_\+.*~#?,&\/\/=]*)",
-        // ).unwrap();
-        // let groups = re.captures(message).unwrap();
-        // let url = groups.get(0).map_or("", |m| m.as_str());
-        // url.to_string()
-        String::from("")
+        let mut url = String::from("");
+        let chunks = message.split(" ");
+        for chunk in chunks {
+            match Url::parse(chunk) {
+                Ok(u) => {
+                    debug!("matched url {:#?}", u);
+                    url = String::from(u.as_str());
+                }
+                Err(_) => {}
+            }
+        }
+        url
     }
 }

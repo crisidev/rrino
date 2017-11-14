@@ -31,6 +31,11 @@ pub mod server {
         json!({ "code": 200, "reason": "server shutdown started" })
     }
 
+    #[catch(500)]
+    fn internal_error() -> JsonValue {
+        json!({"code": 500, "reason": "internal server error"})
+    }
+
     #[catch(404)]
     fn not_found() -> JsonValue {
         json!({"code": 404, "reason": "not found"})
@@ -57,7 +62,7 @@ pub mod server {
             .unwrap();
         let app = rocket::custom(config, true);
         app.mount("/", routes![notify, shutdown])
-            .catch(catchers![not_found, bad_request])
+            .catch(catchers![not_found, bad_request, internal_error])
             .manage(args)
             .launch();
     }
