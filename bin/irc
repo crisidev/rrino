@@ -1,0 +1,63 @@
+#!/bin/zsh
+
+typeset -A PROFILES
+# CHANGE ME
+PROFILES[crisidev]="4225::bash -c 'tmux attach-session -t irc || tmux new-session -s irc weechat'"
+
+function usage() {
+    echo "usage: $0 profile"
+    echo "available profiles: ${(@k)PROFILES}"
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    usage
+fi
+
+PROFILE=$1
+
+if ! echo "${(@k)PROFILES}" |grep -Eq "${PROFILE}"; then
+    usage
+fi
+
+PORT=$(echo ${PROFILES[${PROFILE}]} |awk -F"::" '{print $1}')
+CMD=$(echo ${PROFILES[${PROFILE}]} |awk -F"::" '{print $2}')
+LINK="${PROFILE}:${PORT}"
+RRINO_LOG="/tmp/${LINK}.log"
+IRC_HOST="${PROFILE}_irc"
+AUTOSSH_POLL=15
+AUTOSSH_PORT=$(awk 'BEGIN { srand(); do r = rand()*32000; while ( r < 20000 ); printf("%d\n",r)  }' < /dev/null)
+AUTOSSH_GATETIME=5
+#AUTOSSH_LOGFILE=$HOST.log
+#AUTOSSH_DEBUG=yes
+AUTOSSH_PATH=/usr/local/bin/ssh
+export AUTOSSH_POLL AUTOSSH_LOGFILE AUTOSSH_DEBUG AUTOSSH_PATH AUTOSSH_GATETIME AUTOSSH_PORT
+PATH=$PATH:~/.bin
+
+# Cleanup
+trap cleanup EXIT
+function cleanup() {
+  echo "stopping rrino, link ${LINK}"
+  rrino -l "${LINK}" -s
+  ssh "${IRC_HOST}" -q -t "rm ~/.weechat/rrino/${LINK}" > /dev/null 2>&1
+  rm -f "${RRINO_LOG}"
+}
+
+reset
+
+# Set terminal name
+printf "\033];%s irc\07\n" "${PROFILE}"
+
+# Cleanup leftover tmux
+echo "finding and killing leftover tmux sessions"
+ssh "${IRC_HOST}" -q -t 'kill $(pgrep -f "[a]ttach-session -t irc")' > /dev/null 2>&1
+
+# Start rRino
+echo "starting rrino, link ${LINK}"
+nohup rrino -l "${LINK}" >> "${RRINO_LOG}" &
+ssh "${IRC_HOST}" -q -t "mkdir -p ~/.weechat/rrino; touch ~/.weechat/rrino/${LINK}" > /dev/null 2>&1
+
+# Start autossh and irssi
+autossh -q -t "${IRC_HOST}" "${CMD}"
+
+exit 0

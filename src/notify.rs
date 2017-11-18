@@ -1,14 +1,13 @@
 pub mod osx {
-    extern crate url;
+    extern crate regex;
 
     use std;
     use msg;
     use args;
     use rocket;
-    use self::url::Url;
 
     pub fn run(message: msg::kind::NotifyMsg, args: rocket::State<args::cmd::Args>) -> bool {
-        let title = format!("{}: {}", args.tag, message.from);
+        let title = message.from;
         let url = match_url(&message.message);
         if url != "" {
             notify(&args.notifier, &args.sender, &title, &message.message, &url);
@@ -31,16 +30,7 @@ pub mod osx {
         if url != "" {
             the_process = std::process::Command::new(notifier)
                 .args(
-                    [
-                        "-sender",
-                        sender,
-                        "-title",
-                        title,
-                        "-message",
-                        message,
-                        "-open",
-                        url,
-                    ].iter(),
+                    ["-sender", sender, "-title", title, "-message", message, "-open", url].iter(),
                 )
                 .spawn()
                 .ok()
@@ -58,17 +48,14 @@ pub mod osx {
     }
 
     fn match_url(message: &String) -> String {
-        let mut url = String::from("");
         let chunks = message.split(" ");
         for chunk in chunks {
-            match Url::parse(chunk) {
-                Ok(u) => {
-                    debug!("matched url {:#?}", u);
-                    url = String::from(u.as_str());
-                }
-                Err(_) => {}
+            let re = regex::Regex::new(r"https?://(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:;%()\[\]{}_\+.*~#?,&//=]*)").unwrap();
+            if re.is_match(chunk) {
+                debug!("matched url: {}", chunk);
+                return String::from(chunk)
             }
         }
-        url
+        String::from("")
     }
 }
