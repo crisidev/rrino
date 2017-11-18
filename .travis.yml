@@ -1,12 +1,17 @@
 language: rust
 cache: cargo
 script:
+  - git submodule update --init --recursive
   - cargo build --verbose --all
   - cargo test --verbose --all
 rust:
   - stable
   - beta
   - nightly
+matrix:
+  allow_failures:
+    - rust: stable
+    - rust: beta
 notifications:
   irc:
     channels:
