@@ -1,0 +1,6 @@
+Host irc
+  User irc
+  Port 22
+  Hostname ircbox.org
+  RemoteForward 4223 localhost:4223
+  ControlMaster no

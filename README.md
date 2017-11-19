@@ -1,6 +1,16 @@
 [![Build Status](https://travis-ci.org/crisidev/rrino.svg?branch=master)](https://travis-ci.org/crisidev/rrino)<Paste>
 
 # rRino - Remote IRC Notifier OSX - Weechat
+
+* [Under the hood](#under-the-hood)
+* [Installation and usage](#installation-and-usage)
+  + [Prerequisites](#prerequisites)
+  + [Install](#install)
+  + [Start rRino](#start-rrino)
+  + [Stop rRino](#stop-rrino)
+* [Autossh script](#autossh-script)
+* [SSH configs](#ssh-configs)
+
 IRC SSH notifier for MacOSX. It uses terminal-notifier to talk with
 the notification center, SSH to publish its port on the remote host
 and an Weechat plugin to push notification to the listener.
@@ -46,7 +56,7 @@ a notification with
 * [OpenSSH](http://www.openssh.com)
 * Nohup
 
-### Install it
+### Install
 * On your local machine
 ```shell
 $ git clone https://github.com/crisidev/rrino
@@ -62,10 +72,16 @@ $ cp rrino/weechat_plugins/rrino.py /$HOME/.weechat/python/
 $ (from Weechat) /script load rrino.py
 ```
 
-### Use it
+### Start rRino
 ```shell
-$ nohup rino -l irc:4223 >> /tmp/irc:4223.log &
+$ nohup rrino -l irc:4223 >> /tmp/irc:4223.log &
 $ ssh -R 4223:localhost:4223 $USER@ircbox
+```
+
+### Stop rRino
+```shell
+$ rrino -l irc:4223 -s
+$ rrino -l irc:4223 -sf  # force stop if the above fails
 ```
 
 ## Autossh script
@@ -75,3 +91,6 @@ running over tmux using autossh. Open the file, change the configuration variabl
 ```
 irc crisidev
 ```
+
+## SSH configs
+See ```ssh_configs``` folder for an example config with remote port forwarding.
