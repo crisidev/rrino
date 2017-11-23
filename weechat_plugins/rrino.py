@@ -29,24 +29,30 @@ for key, val in DEFAULT_OPTIONS.items():
 weechat.hook_print('', 'irc_privmsg', '', 1, 'notify', '')
 
 
+def push(data, tag, port):
+    try:
+        req = urllib2.Request('http://{}:{}/notify'.format(weechat.config_get_plugin('server_addr'), port))
+        req.add_header('Content-Type', 'application/json')
+        resp = urllib2.urlopen(req, json.dumps(data))
+        if resp.getcode() != 200:
+            weechat.prnt(
+                "",
+                "%srrino http server %s:%s error, status code %s" % (weechat.prefix("error"), tag, port, resp.getcode())
+            )
+    except BadStatusLine:
+        weechat.prnt("", "%srrino http server %s:%s not listening" % (weechat.prefix("error"), tag, port))
+    except Exception as e:
+        weechat.prnt("", "%srrino http server %s:%s unknown error: %s" % (weechat.prefix("error"), tag, port, e))
+
+
 def push_notification(user, message):
     rrino_dir = os.path.join(weechat.info_get('weechat_dir', ''), 'rrino')
     for client in os.listdir(rrino_dir):
-        try:
-            tag, port = client.split(":")
+        client_split = client.split(":")
+        if len(client_split) == 2:
+            tag, port = client_split
             data = {'from': '{}: {}'.format(tag, user), 'message': message}
-            req = urllib2.Request('http://{}:{}/notify'.format(weechat.config_get_plugin('server_addr'), port))
-            req.add_header('Content-Type', 'application/json')
-            resp = urllib2.urlopen(req, json.dumps(data))
-            if resp.getcode() != 200:
-                weechat.prnt(
-                    "",
-                    "%srrino http server %s error, status code %s" % (weechat.prefix("error"), client, resp.getcode())
-                )
-        except BadStatusLine:
-            weechat.prnt("", "%srrino http server %s not listening" % (weechat.prefix("error"), client))
-        except Exception as e:
-            weechat.prnt("", "%srrino http server %s unknown error: %s" % (weechat.prefix("error"), client, e))
+            push(data, tag, port)
 
 
 def notify(data, buffer, date, tags, displayed, highlight, user, message):

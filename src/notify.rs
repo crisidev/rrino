@@ -17,10 +17,6 @@ pub mod osx {
         while peekable.peek().is_some() {
             let chunk: String = peekable.by_ref().take(args.max_length).collect();
             notify(&args.notifier, &args.sender, &title, &chunk, &url);
-            if message.message.chars().count() > args.max_length {
-                let sleep_time = std::time::Duration::from_millis(1500);
-                std::thread::sleep(sleep_time);
-            }
         }
         true
     }
