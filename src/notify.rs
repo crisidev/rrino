@@ -22,7 +22,7 @@ pub mod osx {
     }
 
     fn notify(notifier: &String, sender: &String, title: &String, message: &String, url: &String) {
-        let the_process: std::process::Child;
+        let mut the_process: std::process::Child;
         if url != "" {
             the_process = std::process::Command::new(notifier)
                 .args(
@@ -40,6 +40,7 @@ pub mod osx {
                 .ok()
                 .expect("failed to execute");
         }
+        the_process.wait().expect("failed to wait on child");
         debug!("terminal-notifier PID is: {}", the_process.id());
     }
 
