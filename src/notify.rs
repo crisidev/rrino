@@ -13,11 +13,8 @@ pub mod osx {
             notify(&args.notifier, &args.sender, &title, &message.message, &url);
             return true;
         }
-        let mut peekable = message.message.chars().peekable();
-        while peekable.peek().is_some() {
-            let chunk: String = peekable.by_ref().take(args.max_length).collect();
-            notify(&args.notifier, &args.sender, &title, &chunk, &url);
-        }
+        let chunk = message.message.chars().take(args.max_length).collect();
+        notify(&args.notifier, &args.sender, &title, &chunk, &url);
         true
     }
 
