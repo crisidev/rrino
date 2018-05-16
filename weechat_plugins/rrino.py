@@ -2,6 +2,7 @@ import os
 import json
 import urllib2
 import datetime
+import threading
 from httplib import BadStatusLine
 
 import weechat
@@ -33,16 +34,14 @@ def push(data, tag, port):
     try:
         req = urllib2.Request('http://{}:{}/notify'.format(weechat.config_get_plugin('server_addr'), port))
         req.add_header('Content-Type', 'application/json')
-        resp = urllib2.urlopen(req, json.dumps(data))
+        resp = urllib2.urlopen(req, json.dumps(data), timeout=0.5)
         if resp.getcode() != 200:
             weechat.prnt(
                 "",
                 "%srrino http server %s:%s error, status code %s" % (weechat.prefix("error"), tag, port, resp.getcode())
             )
-    except BadStatusLine:
-        weechat.prnt("", "%srrino http server %s:%s not listening" % (weechat.prefix("error"), tag, port))
-    except Exception as e:
-        weechat.prnt("", "%srrino http server %s:%s unknown error: %s" % (weechat.prefix("error"), tag, port, e))
+    except Exception:
+        pass
 
 
 def push_notification(user, message):
@@ -52,7 +51,9 @@ def push_notification(user, message):
         if len(client_split) == 2:
             tag, port = client_split
             data = {'from': '{}: {}'.format(tag, user), 'message': message}
-            push(data, tag, port)
+            t = threading.Thread(target=push, args=(data, tag, port))
+            t.daemon = True
+            t.start()
 
 
 def notify(data, buffer, date, tags, displayed, highlight, user, message):
